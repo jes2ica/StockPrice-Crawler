@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>股票实时价格</title>
+
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/dashboard.css" rel="stylesheet">
+	
+	<!-- JavaScripts-->
+	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	
+	<script>
+
+	var stockDetails = [];
+
+	function loadScript(url) {
+    	var head = document.getElementsByTagName('head')[0];
+    	var script = document.createElement('script');
+    	
+    	script.type = 'text/javascript';
+    	script.src = url;
+    	
+    	// 借鉴了jQuery的script跨域方法
+    	script.onload = script.onreadystatechange = function() {
+        	if ((!this.readyState || this.readyState === "loaded" || this.readyState === "complete")){
+            	// 解决IE中的内存溢出问题
+            	script.onload = script.onreadystatechange = null;
+            	if ( head && script.parentNode ) {
+               		head.removeChild( script );
+            	}
+        	}
+    	};
+    	
+    	// 用insertBefore替代appendChild实现IE6兼容
+    	head.insertBefore( script, head.firstChild );
+	}
+
+
+
+	function qStock(groupid,code) { 
+
+		var surl = "http://hq.sinajs.cn/list=s_sh"+code;  
+	    var prefix = "hq_str_s_sh";  
+	     
+	    if(groupid == "sz") {  
+	        surl = "http://hq.sinajs.cn/list=s_sz"+code;  
+	        prefix = "hq_str_s_sz";  
+	    }  
+	       
+	    loadScript(surl);  
+	    
+	    window.setTimeout(function() {  
+
+	    	var tmpPrice = "";
+	    	var stockVar = "";
+	        
+	        eval("var stockDetail = " + prefix + code + ".split(',');"); 
+	        stockDetail.stockCode = code;											// 股票代码
+					stockDetail.stockName = stockDetail[0];									// 股票名称
+					tmpPrice = stockDetail[1];     											// 当前价格
+					stockDetail.stockPrice = tmpPrice.substr(0,tmpPrice.indexOf(".") + 3);
+					tmpVar = stockDetail[2];   										   		// 涨跌量
+					stockDetail.stockVar = tmpVar.substr(0,tmpVar.indexOf(".") + 3);
+					stockDetail.stockVarPercent = stockDetail[3];  							// 涨跌率
+					stockDetail.stockVolume = stockDetail[4];  								// 成交量（手）
+					stockDetail.stockTurnover = stockDetail[5];  							// 成交额（万手）
+					stockDetails.push(stockDetail);
+	     }, 1000);  
+	 }
+
+	 $(function() {
+
+	 	var stocks = [];
+
+	 	// 众信旅游
+	 	var stock0 = {};
+	 	stock0.groupid = "sz";
+	 	stock0.code = "002707"
+	 	stocks.push(stock0);
+
+	 	// 华泰证券
+	 	var stock1 = {};
+	 	stock1.groupid = "sh";
+	 	stock1.code = "601688";
+	 	stocks.push(stock1);
+
+	 	// 招商银行
+	 	var stock2 = {};
+	 	stock2.groupid = "sh";
+	 	stock2.code="600036";
+	 	stocks.push(stock2);
+
+	 	// 浦发银行
+	 	var stock3 = {};
+	 	stock3.groupid = "sh";
+	 	stock3.code = "600000"
+	 	stocks.push(stock3);
+
+	 	// 金达威
+	 	var stock4 = {};
+	 	stock4.groupid = "sz";
+	 	stock4.code = "002626"
+	 	stocks.push(stock4);
+
+	 	// 国元证券
+	 	var stock5 = {};
+	 	stock5.groupid = "sz";
+	 	stock5.code="000728";
+	 	stocks.push(stock5);
+
+	 	// 国投电力
+	 	var stock6 = {};
+	 	stock6.groupid = "sh";
+	 	stock6.code = "600886";
+	 	stocks.push(stock6);
+
+	 	// 南山铝业
+	 	var stock7 = {};
+	 	stock7.groupid = "sh";
+	 	stock7.code="600219";
+	 	stocks.push(stock7);
+
+	 	// 东方航空
+	 	var stock8 = {};
+	 	stock8.groupid = "sh";
+	 	stock8.code = "600115";
+	 	stocks.push(stock8);
+
+	 	// 西水股份
+	 	var stock9 = {};
+	 	stock9.groupid = "sh";
+	 	stock9.code = "600291";
+	 	stocks.push(stock9);
+
+	 	// 九强生物
+	 	var stock10 = {};
+	 	stock10.groupid = "sz";
+	 	stock10.code="300406";
+	 	stocks.push(stock10);
+
+	 	// 腾邦国际
+	 	var stock11 = {};
+	 	stock11.groupid = "sz";
+	 	stock11.code="300178";
+	 	stocks.push(stock11);
+
+	 	// 陆家嘴
+	 	var stock12 = {};
+	 	stock12.groupid = "sh";
+	 	stock12.code="600663";
+	 	stocks.push(stock12);	 	
+
+
+	 	$.each(stocks, function(index, stock) {
+	 		qStock(stock.groupid, stock.code);
+	 	});
+
+	 	window.setTimeout(function() {
+	 		var tbody = "";
+	 		var padding = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
+	 		$.each(stockDetails,function(index,stockDetail) {  
+	 			var trs = "";  
+	 			var highlights = ((stockDetail.stockVarPercent + "").indexOf("-") >= 0)?
+	 			("<td style='color:green;text-align:right;'>" + stockDetail.stockPrice + "</td>" 
+	 				+ "<td style='color:green;text-align:right;'>" + stockDetail.stockVar + "</td>" 
+	 				+ "<td style='color:green;text-align:right;'>" + stockDetail.stockVarPercent + "%" + padding + padding + "</td>") :
+
+	 			("<td style='color:red;text-align:right'>" + stockDetail.stockPrice + "</td>"
+	 				+ "<td style='color:red;text-align:right;'>" + stockDetail.stockVar + "</td>"
+	 				+ "<td style='color:red;text-align:right;'>" + stockDetail.stockVarPercent + "%" + padding + padding + "</td>");
+
+             	trs += "<tr>" 
+             		+ "<td>" + stockDetail.stockName + "</td>"
+             		+ "<td>" + stockDetail.stockCode + "</td>"
+             		+ highlights
+             		+ "<td>" + stockDetail.stockVolume + "</td>"
+             		+ "<td>" + stockDetail.stockTurnover + "</td>";
+             		+ "</tr>"  
+              	tbody += trs;  
+            });  
+
+            $("#content").html(tbody);  
+
+	 	}, 1000);
+	 	
+		
+	});  
+
+
+	</script>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    	<div class="container-fluid">
+        	<div class="navbar-header">
+          	<a class="navbar-brand" href="#">股票实时价格</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+      	<div class="row">
+        	<div class="col-sm-3 col-md-2 sidebar">
+          		<ul class="nav nav-sidebar">
+		        	<li class="active"><a href="#">价格信息<span class="sr-only">(current)</span></a></li>
+		            <li><a href="#">XXXX</a></li>
+		            <li><a href="#">XXXX</a></li>
+		            <li><a href="#">XXXX</a></li>
+		        </ul>
+	        </div>
+	        
+	        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	        	<h1 class="page-header">价格信息</h1>
+			 	
+			 	<div class="table-responsive">
+	            	<table class="table table-striped">
+	              		<thead>
+			                <tr>
+			                  <th class="col-lg-2">股票名称</th>
+			                  <th class="col-lg-1">股票代码</th>
+			                  <th class="col-lg-1">当前价格</th>
+			                  <th class="col-lg-1">涨跌量</th>
+			                  <th class="col-lg-1">涨跌率</th>
+			                  <th class="col-lg-3">成交量（手）</th>
+			                  <th class="col-lg-3">成交额（万元）</th>
+			                </tr>
+			            </thead>
+	              		<tbody id = "content">
+	              		</tbody>
+	            	</table>
+	          	</div>
+	        </div>
+	    </div>
+	</div>
+</body>
